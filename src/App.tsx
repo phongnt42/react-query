@@ -1,8 +1,8 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
 
 const POSTS = [
-  { id: 1, title: 'Post 1' },
-  { id: 2, title: 'Post 2' },
+  { id: '1', title: 'Post 1' },
+  { id: '2', title: 'Post 2' },
 ];
 
 function App() {
@@ -10,6 +10,12 @@ function App() {
     queryKey: ['posts'],
     queryFn: () => wait(1000).then(() => [...POSTS]),
   });
+
+  const newPostMutation = useMutation({
+    mutationFn: (title: string) => {
+      return wait(1000).then(() => POSTS.push({ id: crypto.randomUUID(), title }))
+    }
+  })
 
   if (postsQuery.isLoading) {
     return <h1>Loading</h1>;
@@ -19,7 +25,12 @@ function App() {
     return <pre>{JSON.stringify(postsQuery.error)}</pre>;
   }
 
-  return <h1>TanStack query</h1>;
+  return <div>
+    {postsQuery.data?.map(post => (
+      <div key={post.id}>{post.title}</div>
+    ))}
+    <button onClick={() => newPostMutation.mutate("New post")}>Test</button>
+  </div>;
 }
 
 function wait(duration: number) {
